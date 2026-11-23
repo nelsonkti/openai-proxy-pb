@@ -1,0 +1,24 @@
+# 默认上游为 https://api.openai.com。
+# max_files 是日志总文件数，包含当前日志文件；单个日志文件默认超过 100MB 后自动轮转。
+server:
+  host: "0.0.0.0"
+  port: 8080
+
+logging:
+  path: "./logs"
+  max_files: 7
+
+# 调用本代理服务时使用的项目 Key。
+project_key: "client-demo"
+
+# 每个客户端 Key 都可以独立配置上游 Key、代理和代理策略。
+# 支持 http://、https://、socks5://、socks5h://、socket5h://。
+# strategy 可选 fixed、round_robin、failover，省略时默认为 fixed。
+# proxy 是单代理兼容写法；配置多个代理时使用 proxies。
+# proxy 未配置时默认直连上游，不使用代理。
+# 只有一个 keys 配置时可省略 key，程序会自动使用 project_key 绑定它。
+# upstream_key 可省略，省略时使用绑定的 key 作为上游 OpenAI Key。
+keys:
+  - upstream_key: sk-your-openai-key
+    strategy: fixed
+    proxy: socks5h://user:password@127.0.0.1:1080
