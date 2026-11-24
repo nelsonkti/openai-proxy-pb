@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoORMHelperCache">
+    <option name="schemaMapping">
+      <map>
+        <entry key="Client">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/proxy/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Config">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/config/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="KeyConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/config/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="LoggingConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/config/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="Server">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/server/server.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="ServerConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/config/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="UpstreamConfig">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/config/config.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="cancelOnCloseBody">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/proxy/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="endpointClient">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/proxy/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="localResolveDialer">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/proxy/client.go" />
+            </set>
+          </value>
+        </entry>
+        <entry key="statusWriter">
+          <value>
+            <set>
+              <option value="file://$PROJECT_DIR$/internal/server/server.go" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="scannedPathMapping">
+      <map>
+        <entry key="file://$PROJECT_DIR$/cmd/main.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795418099746" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/config/config.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795428818253" />
+              <option name="schema">
+                <list>
+                  <option value="Config" />
+                  <option value="ServerConfig" />
+                  <option value="LoggingConfig" />
+                  <option value="UpstreamConfig" />
+                  <option value="KeyConfig" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/config/config_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795428838997" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/logging/logging.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795418640466" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/logging/logging_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795418640468" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/proxy/client.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795429956597" />
+              <option name="schema">
+                <list>
+                  <option value="Client" />
+                  <option value="endpointClient" />
+                  <option value="localResolveDialer" />
+                  <option value="cancelOnCloseBody" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/proxy/client_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795429926268" />
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/server/server.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795429377879" />
+              <option name="schema">
+                <list>
+                  <option value="Server" />
+                  <option value="statusWriter" />
+                </list>
+              </option>
+            </ScannedPath>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/internal/server/server_test.go">
+          <value>
+            <ScannedPath>
+              <option name="lastModified" value="1795423026108" />
+            </ScannedPath>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="tableStructMapping">
+      <map>
+        <entry key="cancel_on_close_body" value="cancelOnCloseBody" />
+        <entry key="client" value="Client" />
+        <entry key="config" value="Config" />
+        <entry key="endpoint_client" value="endpointClient" />
+        <entry key="key_config" value="KeyConfig" />
+        <entry key="local_resolve_dialer" value="localResolveDialer" />
+        <entry key="logging_config" value="LoggingConfig" />
+        <entry key="server" value="Server" />
+        <entry key="server_config" value="ServerConfig" />
+        <entry key="status_writer" value="statusWriter" />
+        <entry key="upstream_config" value="UpstreamConfig" />
+      </map>
+    </option>
+    <option name="lastTimeChecked" value="1795407521461" />
+  </component>
+</project>
