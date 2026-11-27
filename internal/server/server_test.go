@@ -136,3 +136,52 @@ func TestServeHTTPUsesProjectKeyOutsideKeys(t *testing.T) {
 		t.Fatalf("status = %d, calls = %d", recorder.Code, calls)
 	}
 }
+
+func TestAdminLoginSessionAndKeyModelTest(t *testing.T) {
+	upstreamServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.URL.Path != "/v1/models/gpt-4o-mini" {
+			t.Errorf("upstream path = %q", request.URL.Path)
+		}
+		if got := request.Header.Get("Authorization"); got != "Bearer upstream" {
+			t.Errorf("upstream authorization = %q", got)
+		}
+		writer.Header().Set("Content-Type", "application/json")
+		_, _ = writer.Write([]byte(`{"id":"gpt-4o-mini"}`))
+	}))
+	defer upstreamServer.Close()
+
+	service := newTestServerWithConfig(t, upstreamServer, config.Config{
+		Admin:    config.AdminConfig{Enabled: true, Path: "/admin", APIKey: "admin-secret"},
+		Upstream: config.UpstreamConfig{BaseURL: upstreamServer.URL},
+		Keys:     []config.KeyConfig{{Key: "client", UpstreamKey: "upstream"}},
+	})
+
+	login := httptest.NewRequest(http.MethodPost, "/admin/api/login", strings.NewReader(`{"api_key":"admin-secret"}`))
+	login.Header.Set("Content-Type", "application/json")
+	loginRecorder := httptest.NewRecorder()
+	service.ServeHTTP(loginRecorder, login)
+	if loginRecorder.Code != http.StatusOK {
+		t.Fatalf("login status = %d, body = %s", loginRecorder.Code, loginRecorder.Body.String())
+	}
+	cookies := loginRecorder.Result().Cookies()
+	if len(cookies) != 1 || cookies[0].Name != adminSessionCookie || cookies[0].Value == "" {
+		t.Fatalf("login cookies = %+v", cookies)
+	}
+
+	statusRequest := httptest.NewRequest(http.MethodGet, "/admin/api/status", nil)
+	statusRequest.AddCookie(cookies[0])
+	statusRecorder := httptest.NewRecorder()
+	service.ServeHTTP(statusRecorder, statusRequest)
+	if statusRecorder.Code != http.StatusOK {
+		t.Fatalf("status endpoint = %d, body = %s", statusRecorder.Code, statusRecorder.Body.String())
+	}
+
+	testRequest := httptest.NewRequest(http.MethodPost, "/admin/api/keys/1/test", strings.NewReader(`{"model":"gpt-4o-mini"}`))
+	testRequest.Header.Set("Content-Type", "application/json")
+	testRequest.AddCookie(cookies[0])
+	testRecorder := httptest.NewRecorder()
+	service.ServeHTTP(testRecorder, testRequest)
+	if testRecorder.Code != http.StatusOK || !strings.Contains(testRecorder.Body.String(), `"ok":true`) {
+		t.Fatalf("key test = %d, body = %s", testRecorder.Code, testRecorder.Body.String())
+	}
+}

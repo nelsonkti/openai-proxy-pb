@@ -8,7 +8,7 @@
 - 支持 `http://`、`https://`、`socks5://`、`socks5h://` 出站代理，并兼容常见拼写 `socket5h://`
 - 每个客户端 Key 可独立绑定代理，并支持固定、轮询和故障切换策略
 - 每个 Key 复用独立 HTTP Transport/连接池，带连接超时、响应头超时、请求超时、重试退避和 `Retry-After`
-- 不包含账号登录、OAuth 或管理后台
+- 可选管理页面可查看 Key 状态、手动启用/禁用 Key 及最近错误（默认关闭）
 
 ## 启动
 
@@ -74,3 +74,20 @@ keys:
 - 普通 POST 默认不重试；如果连接在请求头写出前失败，会安全重试有限次数；请求带有 `Idempotency-Key` 时还允许按状态码有限重试，流式请求不会自动重试。
 - 429/503 等响应优先读取 `Retry-After`，否则使用指数退避并加入抖动。
 - SSE 流式响应按块转发，不缓冲完整响应。
+
+## Key 池和管理页面
+
+同一个 `project_key` 下可以配置多个不填写 `key` 的 `keys` 条目。请求会在这些上游 Key 之间轮询；当上游明确返回额度耗尽（例如 `insufficient_quota`、`billing_hard_limit` 或额度耗尽提示）时，该 Key 会在当前进程内自动禁用，并继续尝试下一个 Key。管理页面可以手动恢复或禁用 Key：
+
+```yaml
+admin:
+  enabled: true
+  path: "/admin"
+  api_key: "replace-with-a-long-random-admin-key"
+
+keys:
+  - upstream_key: sk-first-key
+  - upstream_key: sk-second-key
+```
+
+打开 `http://127.0.0.1:8080/admin` 后，先使用 `admin.api_key` 登录，页面会通过 HttpOnly 会话 Cookie 访问管理接口。页面展示脱敏后的 Key 状态和最近 200 条错误，并可在每个 Key 行输入模型名称（例如 `gpt-4o-mini`）调用 `GET /v1/models/{model}` 测试该 Key；该测试不会创建聊天请求。管理接口仍兼容 `X-Admin-Key` 或 `Authorization: Bearer ...`，管理页面默认关闭，建议仅在内网或 HTTPS 后使用。

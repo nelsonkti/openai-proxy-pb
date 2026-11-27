@@ -4,6 +4,11 @@ server:
   host: "0.0.0.0"
   port: 8080
 
+admin:
+  enabled: false
+  path: "/admin"
+  api_key: "change-this-admin-key"
+
 logging:
   path: "./logs"
   max_files: 7
@@ -22,3 +27,6 @@ keys:
   - upstream_key: sk-your-openai-key
     strategy: fixed
     proxy: socks5h://user:password@127.0.0.1:1080
+  # 同一 project_key 下可继续添加多个上游 Key，额度耗尽会自动切换。
+  # - upstream_key: sk-another-openai-key
+  #   strategy: fixed

@@ -66,3 +66,28 @@ time=2026-11-23T18:34:03.970+08:00 level=INFO msg="request completed" request_id
 time=2026-11-23T18:37:19.117+08:00 level=INFO msg="openai proxy listening" address=0.0.0.0:8080 upstream=https://api.openai.com keys=1
 time=2026-11-23T18:37:28.728+08:00 level=INFO msg="request completed" request_id=4d32edc5192130fd method=POST path=/v1/images/generations status=400 bytes=177 duration=480.34118ms
 time=2026-11-23T18:38:30.828+08:00 level=INFO msg="request completed" request_id=c80f95cacd769740 method=POST path=/v1/images/generations status=200 bytes=2316243 duration=25.760198626s
+time=2026-11-27T23:31:56.963+08:00 level=INFO msg="openai proxy listening" address=0.0.0.0:8080 upstream=https://api.openai.com keys=1
+time=2026-11-27T23:32:52.972+08:00 level=INFO msg="request completed" request_id=b538bf83118c66d3 method=GET path=/ status=200 bytes=41 duration=0s
+time=2026-11-27T23:32:53.403+08:00 level=INFO msg="request completed" request_id=a3c827cc68026eee method=GET path=/favicon.ico status=404 bytes=103 duration=0s
+time=2026-11-27T23:33:05.808+08:00 level=INFO msg="request completed" request_id=23fcb9bd183e4b52 method=GET path=/mKXJcsHdYe status=200 bytes=2799 duration=0s
+time=2026-11-27T23:33:14.378+08:00 level=INFO msg="request completed" request_id=667e02f02d26c3a6 method=GET path=/mKXJcsHdYe/api/status status=200 bytes=144 duration=0s
+time=2026-11-27T23:33:14.406+08:00 level=INFO msg="request completed" request_id=42b425e213c96c71 method=GET path=/mKXJcsHdYe/api/logs status=200 bytes=3 duration=0s
+time=2026-11-27T23:34:26.416+08:00 level=INFO msg="openai proxy listening" address=0.0.0.0:8080 upstream=https://api.openai.com keys=1
+time=2026-11-27T23:34:26.427+08:00 level=ERROR msg="server stopped" error="listen tcp 0.0.0.0:8080: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted."
+time=2026-11-27T23:35:31.803+08:00 level=INFO msg="request completed" request_id=46bf4bcbec4d63c0 method=GET path=/mKXJcsHdYe/api/status status=200 bytes=144 duration=0s
+time=2026-11-27T23:35:31.806+08:00 level=INFO msg="request completed" request_id=b9112c309eb53f13 method=GET path=/mKXJcsHdYe/api/logs status=200 bytes=3 duration=0s
+time=2026-11-28T00:04:48.345+08:00 level=INFO msg="openai proxy listening" address=0.0.0.0:8080 upstream=https://api.openai.com keys=1
+time=2026-11-28T00:04:53.783+08:00 level=INFO msg="request completed" request_id=3907a52cc4fde452 method=GET path=/mKXJcsHdYe status=200 bytes=5804 duration=0s
+time=2026-11-28T00:04:53.924+08:00 level=INFO msg="request completed" request_id=fcb27291311036bb method=GET path=/mKXJcsHdYe/api/status status=401 bytes=96 duration=0s
+time=2026-11-28T00:05:02.552+08:00 level=INFO msg="request completed" request_id=d90502ab53e176fa method=POST path=/mKXJcsHdYe/api/login status=200 bytes=12 duration=517.5µs
+time=2026-11-28T00:05:02.555+08:00 level=INFO msg="request completed" request_id=cb0a6fc76e8bcfda method=GET path=/mKXJcsHdYe/api/status status=200 bytes=144 duration=0s
+time=2026-11-28T00:05:02.563+08:00 level=INFO msg="request completed" request_id=e8bc51a1478d694c method=GET path=/mKXJcsHdYe/api/logs status=200 bytes=3 duration=0s
+time=2026-11-28T00:05:18.720+08:00 level=INFO msg="request completed" request_id=e271fdb47bde877b method=POST path=/mKXJcsHdYe/api/keys/1/disable status=200 bytes=12 duration=0s
+time=2026-11-28T00:05:18.723+08:00 level=INFO msg="request completed" request_id=cb7b563c5dc5a5d1 method=GET path=/mKXJcsHdYe/api/status status=200 bytes=194 duration=0s
+time=2026-11-28T00:05:18.725+08:00 level=INFO msg="request completed" request_id=6ee557cc0ba1a5d0 method=GET path=/mKXJcsHdYe/api/logs status=200 bytes=3 duration=0s
+time=2026-11-28T00:05:25.173+08:00 level=INFO msg="request completed" request_id=689f7a5bf2fd0e9d method=POST path=/mKXJcsHdYe/api/keys/1/test status=400 bytes=212 duration=15.0002298s
+time=2026-11-28T00:05:38.910+08:00 level=INFO msg="request completed" request_id=0666893e71258cf7 method=POST path=/mKXJcsHdYe/api/keys/1/test status=400 bytes=212 duration=15.0011011s
+time=2026-11-28T00:05:55.459+08:00 level=INFO msg="request completed" request_id=28c8e2e18c5bbd45 method=POST path=/mKXJcsHdYe/api/keys/1/test status=200 bytes=213 duration=1.8981662s
+time=2026-11-28T00:06:01.817+08:00 level=INFO msg="request completed" request_id=8bff5500fce57ed4 method=POST path=/mKXJcsHdYe/api/keys/1/enable status=200 bytes=12 duration=0s
+time=2026-11-28T00:06:01.819+08:00 level=INFO msg="request completed" request_id=0cf8460bccc36a6b method=GET path=/mKXJcsHdYe/api/status status=200 bytes=144 duration=0s
+time=2026-11-28T00:06:01.822+08:00 level=INFO msg="request completed" request_id=0c60d56e30615ae3 method=GET path=/mKXJcsHdYe/api/logs status=200 bytes=3 duration=0s

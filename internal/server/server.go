@@ -20,29 +20,42 @@ import (
 
 type Server struct {
 	config   config.Config
-	clients  map[string]*proxy.Client
+	routes   map[string]*keyRoute
+	pools    []*proxy.Pool
 	logger   *slog.Logger
+	errors   *errorLogBuffer
+	sessions *adminSessionStore
 	sequence atomic.Uint64
 }
 
+type keyRoute struct {
+	pool *proxy.Pool
+}
+
 func New(cfg config.Config, logger *slog.Logger) (*Server, error) {
-	clients := make(map[string]*proxy.Client, len(cfg.Keys))
-	for _, key := range cfg.Keys {
-		client, err := proxy.NewClient(key, cfg.Upstream)
-		if err != nil {
-			return nil, fmt.Errorf("create client for key %s: %w", maskKey(key.Key), err)
-		}
-		clients[key.Key] = client
-	}
-	if cfg.ProjectKey != "" && len(cfg.Keys) == 1 {
-		if _, exists := clients[cfg.ProjectKey]; !exists {
-			clients[cfg.ProjectKey] = clients[cfg.Keys[0].Key]
-		}
-	}
 	if logger == nil {
 		logger = slog.Default()
 	}
-	return &Server{config: cfg, clients: clients, logger: logger}, nil
+	groups := make(map[string][]config.KeyConfig, len(cfg.Keys))
+	for _, key := range cfg.Keys {
+		groups[key.Key] = append(groups[key.Key], key)
+	}
+	routes := make(map[string]*keyRoute, len(groups)+1)
+	pools := make([]*proxy.Pool, 0, len(groups))
+	keyID := 1
+	for clientKey, keys := range groups {
+		pool, err := proxy.NewPool(keys, cfg.Upstream, keyID)
+		if err != nil {
+			return nil, fmt.Errorf("create client pool for key %s: %w", proxy.MaskSecret(clientKey), err)
+		}
+		keyID += len(keys)
+		routes[clientKey] = &keyRoute{pool: pool}
+		pools = append(pools, pool)
+	}
+	if cfg.ProjectKey != "" && len(cfg.Keys) == 1 {
+		routes[cfg.ProjectKey] = routes[cfg.Keys[0].Key]
+	}
+	return &Server{config: cfg, routes: routes, pools: pools, logger: logger, errors: newErrorLogBuffer(200), sessions: newAdminSessionStore()}, nil
 }
 
 func (s *Server) Handler() http.Handler {
@@ -58,12 +71,18 @@ func (s *Server) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	defer func() {
 		if recovered := recover(); recovered != nil {
 			s.logger.Error("request panic", "request_id", requestID, "method", request.Method, "path", request.URL.Path, "panic", recovered)
+			s.recordError(errorEvent{RequestID: requestID, Method: request.Method, Path: request.URL.Path, Message: "request panic: " + fmt.Sprint(recovered)})
 			if !responseWriter.wroteHeaders {
 				writeAPIError(writer, http.StatusInternalServerError, "internal_server_error", "Internal server error", nil)
 			}
 		}
 		s.logger.Info("request completed", "request_id", requestID, "method", request.Method, "path", request.URL.Path, "status", responseWriter.status(), "bytes", responseWriter.bytesWritten, "duration", time.Since(started))
 	}()
+
+	if s.config.Admin.Enabled && s.isAdminPath(request.URL.Path) {
+		s.handleAdmin(writer, request)
+		return
+	}
 
 	if request.URL.Path == "/healthz" {
 		writeJSON(writer, http.StatusOK, map[string]string{"status": "ok"})
@@ -87,7 +106,7 @@ func (s *Server) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		writeAPIError(writer, http.StatusUnauthorized, "invalid_api_key", "Missing or invalid API key", nil)
 		return
 	}
-	client, ok := s.clients[key]
+	route, ok := s.routes[key]
 	if !ok {
 		writeAPIError(writer, http.StatusUnauthorized, "invalid_api_key", "Incorrect API key provided", nil)
 		return
@@ -106,13 +125,17 @@ func (s *Server) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	stream := isStreaming(body)
 	var response *http.Response
 	if stream {
-		response, err = client.ForwardWithoutRetry(request.Context(), request.Method, request.URL.RequestURI(), request.Header, body)
+		response, err = route.pool.ForwardWithoutRetry(request.Context(), request.Method, request.URL.RequestURI(), request.Header, body)
 	} else {
-		response, err = client.Forward(request.Context(), request.Method, request.URL.RequestURI(), request.Header, body)
+		response, err = route.pool.Forward(request.Context(), request.Method, request.URL.RequestURI(), request.Header, body)
 	}
 	if err != nil {
 		s.logger.Error("upstream request failed", "request_id", requestID, "key", maskKey(key), "error", err)
+		s.recordError(errorEvent{RequestID: requestID, Method: request.Method, Path: request.URL.Path, Message: err.Error()})
 		status := http.StatusBadGateway
+		if errors.Is(err, proxy.ErrNoActiveKeys) {
+			status = http.StatusServiceUnavailable
+		}
 		if errors.Is(err, context.DeadlineExceeded) || errors.Is(request.Context().Err(), context.DeadlineExceeded) {
 			status = http.StatusGatewayTimeout
 		}
@@ -120,6 +143,10 @@ func (s *Server) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	defer response.Body.Close()
+	if response.StatusCode >= 400 {
+		details := responseErrorDetails(response)
+		s.recordError(errorEvent{RequestID: requestID, Method: request.Method, Path: request.URL.Path, Status: response.StatusCode, Message: details})
+	}
 	copyResponseHeaders(writer.Header(), response.Header)
 	writer.WriteHeader(response.StatusCode)
 	if stream {

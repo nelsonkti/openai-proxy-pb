@@ -80,6 +80,7 @@ func (s *Size) UnmarshalYAML(node *yaml.Node) error {
 type Config struct {
 	ProjectKey string         `yaml:"project_key"`
 	Server     ServerConfig   `yaml:"server"`
+	Admin      AdminConfig    `yaml:"admin"`
 	Logging    LoggingConfig  `yaml:"logging"`
 	Upstream   UpstreamConfig `yaml:"upstream"`
 	Keys       []KeyConfig    `yaml:"keys"`
@@ -92,6 +93,12 @@ type ServerConfig struct {
 	WriteTimeout Duration `yaml:"write_timeout"`
 	IdleTimeout  Duration `yaml:"idle_timeout"`
 	MaxBodyBytes Size     `yaml:"max_body_bytes"`
+}
+
+type AdminConfig struct {
+	Enabled bool   `yaml:"enabled"`
+	Path    string `yaml:"path"`
+	APIKey  string `yaml:"api_key"`
 }
 
 type LoggingConfig struct {
@@ -166,6 +173,20 @@ func (c *Config) SetDefaultsAndValidate() error {
 	if c.Server.MaxBodyBytes < 0 {
 		return fmt.Errorf("server.max_body_bytes cannot be negative")
 	}
+	if c.Admin.Path == "" {
+		c.Admin.Path = "/admin"
+	}
+	if !strings.HasPrefix(c.Admin.Path, "/") {
+		return fmt.Errorf("admin.path must start with /")
+	}
+	c.Admin.Path = strings.TrimRight(c.Admin.Path, "/")
+	if c.Admin.Path == "" {
+		c.Admin.Path = "/admin"
+	}
+	c.Admin.APIKey = strings.TrimSpace(c.Admin.APIKey)
+	if c.Admin.Enabled && c.Admin.APIKey == "" {
+		return fmt.Errorf("admin.api_key is required when admin.enabled is true")
+	}
 	if c.Logging.Path == "" {
 		c.Logging.Path = "./logs"
 	}
@@ -235,23 +256,26 @@ func (c *Config) SetDefaultsAndValidate() error {
 	if len(c.Keys) == 0 {
 		return fmt.Errorf("keys must contain at least one configured key")
 	}
-	seen := make(map[string]struct{}, len(c.Keys))
+	seenExplicit := make(map[string]struct{}, len(c.Keys))
 	for index := range c.Keys {
 		key := &c.Keys[index]
+		keyWasEmpty := strings.TrimSpace(key.Key) == ""
 		key.Key = strings.TrimSpace(key.Key)
 		key.UpstreamKey = strings.TrimSpace(key.UpstreamKey)
 		key.Proxy = strings.TrimSpace(key.Proxy)
 		key.Strategy = strings.ToLower(strings.TrimSpace(key.Strategy))
-		if key.Key == "" && c.ProjectKey != "" && len(c.Keys) == 1 {
+		if key.Key == "" && c.ProjectKey != "" {
 			key.Key = c.ProjectKey
 		}
 		if key.Key == "" {
 			return fmt.Errorf("keys[%d].key cannot be empty", index)
 		}
-		if _, exists := seen[key.Key]; exists {
-			return fmt.Errorf("duplicate configured key %q", key.Key)
+		if !keyWasEmpty {
+			if _, exists := seenExplicit[key.Key]; exists {
+				return fmt.Errorf("duplicate configured key %q", key.Key)
+			}
+			seenExplicit[key.Key] = struct{}{}
 		}
-		seen[key.Key] = struct{}{}
 		if key.UpstreamKey == "" {
 			key.UpstreamKey = key.Key
 		}
