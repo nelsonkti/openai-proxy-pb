@@ -2,4 +2,4 @@ config.yaml
 .DS_Store
 bin/
 openai-proxy
-.idea
+.idea/
